@@ -4,13 +4,13 @@ import it.toporowicz.aircrafts.AircraftDataProvider
 import it.toporowicz.broadcast.FlightBroadcaster
 import it.toporowicz.coordinates.CoordinatesBoundaryCreator
 import it.toporowicz.radarData.RadarDataProvider
-import it.toporowicz.storage.FlightDataStorage
+import it.toporowicz.storage.FlightDataCache
 
 class FlightDataModule(
         private val coordinatesBoundaryCreator: CoordinatesBoundaryCreator,
         private val radarDataProvider: RadarDataProvider,
         private val flightBroadcaster: FlightBroadcaster,
-        private val flightDataStorage: FlightDataStorage,
+        private val flightDataCache: FlightDataCache,
         private val aircraftDataProvider: AircraftDataProvider
 ) {
     fun broadcastDataAccordingTo(flightScannerConfig: FlightScannerConfig) {
@@ -24,13 +24,19 @@ class FlightDataModule(
 
         val freshRadarData = radarDataProvider.getRadarDataWithin(coordinatesBoundary, flightScannerConfig.altitudeThreshold)
 
-        val icao24OfNewFlights = flightDataStorage.set(flightScannerConfig.jobId, freshRadarData)
+        val oldRadarData = flightDataCache.get(flightScannerConfig.jobId)
+        flightDataCache.set(flightScannerConfig.jobId, freshRadarData)
+
+        val icao24OfNewFlights = freshRadarData
+                .map { it.icao24 }
+                .minus(oldRadarData?.radarData?.map { it.icao24 } ?: emptySet())
+                .toSet()
 
         flightBroadcaster.broadcast(flightScannerConfig.jobId, icao24OfNewFlights)
     }
 
     fun getLastKnownFlightDataFor(jobId: String): LastKnownFlightsData? {
-        val lastKnownRadarData = flightDataStorage.get(jobId) ?: return null
+        val lastKnownRadarData = flightDataCache.get(jobId) ?: return null
 
         val icao24s = lastKnownRadarData.radarData.map { it.icao24 }.toSet()
 

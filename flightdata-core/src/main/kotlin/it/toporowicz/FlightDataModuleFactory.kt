@@ -5,10 +5,10 @@ import it.toporowicz.broadcast.FlightBroadcaster
 import it.toporowicz.broadcast.notifications.NotificationSender
 import it.toporowicz.coordinates.CoordinatesBoundaryCreator
 import it.toporowicz.radarData.RadarDataProvider
-import it.toporowicz.storage.FlightDataStorage
+import it.toporowicz.storage.FlightDataCache
 
 class FlightDataModuleFactory {
-    fun create(radarDataProvider: RadarDataProvider, flightDataStorage: FlightDataStorage,
+    fun create(radarDataProvider: RadarDataProvider, flightDataCache: FlightDataCache,
                notificationSender: NotificationSender, aircraftDataProvider: AircraftDataProvider): FlightDataModule {
         return FlightDataModule(
                 CoordinatesBoundaryCreator(),
@@ -16,7 +16,7 @@ class FlightDataModuleFactory {
                 FlightBroadcaster(
                         notificationSender
                 ),
-                flightDataStorage,
+                flightDataCache,
                 aircraftDataProvider
         )
     }

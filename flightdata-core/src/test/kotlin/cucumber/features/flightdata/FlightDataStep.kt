@@ -1,7 +1,7 @@
 package cucumber.features.flightdata
 
 import cucumber.features.flightdata.mocks.FakeAircraftDataProvider
-import cucumber.features.flightdata.mocks.FakeFlightDataStorage
+import cucumber.features.flightdata.mocks.FakeFlightDataCache
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import it.toporowicz.*
@@ -30,10 +30,11 @@ class FlightDataStep : En {
 
     private val radarDataProvider = mock(RadarDataProvider::class.java)
     private val notificationSender = mock(NotificationSender::class.java)
-    private val flightDataStorage = FakeFlightDataStorage(clock)
+    private val flightDataStorage = FakeFlightDataCache(clock)
     private val aircraftDataProvider = FakeAircraftDataProvider()
 
     init {
+        println("new instance")
         this.module = FlightDataModuleFactory().create(
                 radarDataProvider,
                 flightDataStorage,
@@ -68,30 +69,6 @@ class FlightDataStep : En {
             time: Int -> mockTime(time)
         }
 
-        Given("flight data cache for job with id={string} contains the following entries")
-        { jobId: String, flightDataCacheTable: DataTable ->
-            val flightData = flightDataCacheTable.asMaps().map { rowMap ->
-                RadarData(
-                        requireNotNull(rowMap["icao24"]),
-                        rowMap["callSign"],
-                        rowMap["barometricAltitude"]?.let { Distance(BigDecimal(it)) },
-                        rowMap["onGround"]?.let { it.toBoolean() }
-                )
-            }.toSet()
-
-            this.flightDataStorage.overwrite(jobId, flightData)
-        }
-
-        Given("flight data cache does not contain data for job with id={string}")
-        { jobId: String ->
-            this.flightDataStorage.clearDataFor(jobId)
-        }
-
-        Given("flight data cache for job with id={string} is empty")
-        { jobId: String ->
-            this.flightDataStorage.overwrite(jobId, HashSet())
-        }
-
         When("scanner is run with the following configuration")
         { jobConfigTable: DataTable ->
             val row = jobConfigTable.asMaps()[0]
@@ -123,6 +100,7 @@ class FlightDataStep : En {
                 )
             }.toSet()
 
+            Mockito.reset(this.radarDataProvider)
             given(this.radarDataProvider.getRadarDataWithin(
                     CoordinatesBoundary(
                             DecimalDegrees(BigDecimal(latMax)),

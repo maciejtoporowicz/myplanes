@@ -1,9 +1,8 @@
-package it.toporowicz.features.flightdata.adapter.storage
+package it.toporowicz.features.flightdata.adapter.cache
 
 import it.toporowicz.LastKnownRadarData
 import it.toporowicz.radarData.RadarData
-import it.toporowicz.storage.FlightDataStorage
-import it.toporowicz.storage.Icao24OfNewFlights
+import it.toporowicz.storage.FlightDataCache
 import it.toporowicz.infrastructure.mapper.ObjectMapper
 import redis.clients.jedis.Jedis
 import redis.clients.jedis.JedisPool
@@ -15,16 +14,15 @@ object RedisKey {
     fun forLastUpdate(jobId: String) = "jobs:${jobId}:lastUpdate"
 }
 
-class RedisBasedFlightDataStorage(private val jedisPool: JedisPool, private val objectMapper: ObjectMapper, private val expireAfterSeconds: Int) :
-        FlightDataStorage {
+class RedisBasedFlightDataCache(private val jedisPool: JedisPool, private val objectMapper: ObjectMapper, private val expireAfterSeconds: Int) :
+        FlightDataCache {
 
-    override fun set(jobId: String, radarData: Set<RadarData>): Icao24OfNewFlights {
+    override fun set(jobId: String, radarData: Set<RadarData>) {
         return jedisPool.resource.use { jedis ->
             val icao24OfFreshFlights = radarData.map { radarDataItem -> radarDataItem.icao24 }
 
             val icao24OfFlightsKnownUpToThisMoment = getIcao24OfKnownFlights(jobId, jedis)
             val icao24OfFlightsNoLongerPresent = icao24OfFlightsKnownUpToThisMoment - icao24OfFreshFlights
-            val icao24OfNewFlights = icao24OfFreshFlights - icao24OfFlightsKnownUpToThisMoment
 
             val keyForKnownFlightIds = RedisKey.forKnownFlightIds(jobId)
 
@@ -39,17 +37,6 @@ class RedisBasedFlightDataStorage(private val jedisPool: JedisPool, private val 
             if(icao24OfFreshFlights.count() > 0) {
                 jedis.sadd(keyForKnownFlightIds, *(icao24OfFreshFlights.toTypedArray()))
             }
-            jedis.expire(keyForKnownFlightIds, expireAfterSeconds)
-            radarData.forEach { radarDataItem ->
-                jedis.setex(
-                        RedisKey.forKnownFlight(jobId, radarDataItem.icao24),
-                        expireAfterSeconds,
-                        objectMapper.toJson(radarDataItem)
-                )
-            }
-            jedis.setex(RedisKey.forLastUpdate(jobId), expireAfterSeconds, Instant.now().toString())
-
-            icao24OfNewFlights.toSet()
         }
     }
 
