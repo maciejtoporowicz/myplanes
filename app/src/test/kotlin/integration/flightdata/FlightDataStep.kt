@@ -4,10 +4,10 @@ import integration.flightdata.fakes.FakePushMessagingService
 import integration.flightdata.mocks.OpenSkyApiMock
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import it.toporowicz.domain.flightdata.api.*
-import it.toporowicz.domain.flightdata.core.FlightDataModule
 import it.toporowicz.domain.flightdata.FlightDataModuleFactory
 import it.toporowicz.domain.flightdata.OpenSkyApiConfig
+import it.toporowicz.domain.flightdata.api.*
+import it.toporowicz.domain.flightdata.core.FlightDataModule
 import it.toporowicz.domain.flightdata.ports.radarData.RadarData
 import it.toporowicz.infrastructure.mapper.ObjectMapperFactory
 import it.toporowicz.infrastructure.pushmessaging.Message
@@ -15,20 +15,21 @@ import org.assertj.core.api.Assertions.assertThat
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.testcontainers.containers.GenericContainer
+import org.testcontainers.utility.DockerImageName
 import redis.clients.jedis.JedisPool
-import redis.embedded.RedisServer
 import java.math.BigDecimal
 import java.time.Clock
 import java.time.Instant
 
-const val REDIS_PORT = 49555
 const val OPEN_SKY_API_USER = "username123"
 const val OPEN_SKY_API_PASS = "password123"
 
 class FlightDataStep : En {
     private val clock = mock(Clock::class.java)
-    private val redis = RedisServer.builder().port(REDIS_PORT).setting("maxheap 128M").build()
-    private val jedisPool = JedisPool("localhost", REDIS_PORT)
+    private val redis: GenericContainer<Nothing> = GenericContainer<Nothing>(DockerImageName.parse("redis:5.0.3-alpine"))
+            .withExposedPorts(6379)
+    private val jedisPool: JedisPool
     private val openSkyApiMock = OpenSkyApiMock(OPEN_SKY_API_USER, OPEN_SKY_API_PASS)
 
     private val pushNotificationService = FakePushMessagingService()
@@ -36,6 +37,9 @@ class FlightDataStep : En {
     private val module: FlightDataModule
 
     init {
+        redis.start()
+
+        jedisPool = JedisPool("localhost", this.redis.firstMappedPort)
 
         val openSkyApiConfig = object : OpenSkyApiConfig {
             override val url: String
@@ -58,10 +62,6 @@ class FlightDataStep : En {
     }
 
     private fun configureSteps() {
-        Before { _ ->
-            redis.start()
-        }
-
         After { _ ->
             openSkyApiMock.stop()
             redis.stop()
