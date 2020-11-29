@@ -27,5 +27,5 @@ jobs:
           key: ${{ secrets.DO_MYPLANES_KEY }}
           port: 22
           script: |
-            ln -s "app-{{ github.event.inputs.sha1 }}.jar" myplanes.jar
+            ln -s "app-${{ github.event.inputs.sha1 }}.jar" myplanes.jar
             sudo systemctl restart myplanes
