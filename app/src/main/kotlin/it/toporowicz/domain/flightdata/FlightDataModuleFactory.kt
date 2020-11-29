@@ -1,4 +1,4 @@
-package it.toporowicz.domain.flightdata.domain
+package it.toporowicz.domain.flightdata
 
 import io.micronaut.context.annotation.ConfigurationProperties
 import io.micronaut.context.annotation.Factory

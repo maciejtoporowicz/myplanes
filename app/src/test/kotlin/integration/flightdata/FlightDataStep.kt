@@ -6,8 +6,8 @@ import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
 import it.toporowicz.domain.flightdata.api.*
 import it.toporowicz.domain.flightdata.core.FlightDataModule
-import it.toporowicz.domain.flightdata.domain.FlightDataModuleFactory
-import it.toporowicz.domain.flightdata.domain.OpenSkyApiConfig
+import it.toporowicz.domain.flightdata.FlightDataModuleFactory
+import it.toporowicz.domain.flightdata.OpenSkyApiConfig
 import it.toporowicz.domain.flightdata.ports.radarData.RadarData
 import it.toporowicz.infrastructure.mapper.ObjectMapperFactory
 import it.toporowicz.infrastructure.pushmessaging.Message
