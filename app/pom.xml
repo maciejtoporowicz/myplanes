@@ -12,12 +12,17 @@
 
     <parent>
         <groupId>it.toporowicz</groupId>
-        <artifactId>base</artifactId>
+        <artifactId>base-pom</artifactId>
         <version>0.1</version>
         <relativePath/>
     </parent>
 
     <dependencies>
+        <dependency>
+            <groupId>ch.obermuhlner</groupId>
+            <artifactId>big-math</artifactId>
+            <version>2.3.0</version>
+        </dependency>
         <!-- kotlin -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -38,10 +43,6 @@
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
             <artifactId>quartz</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.obermuhlner</groupId>
-            <artifactId>big-math</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -88,11 +89,17 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- myplanes -->
         <dependency>
-            <groupId>it.toporowicz</groupId>
-            <artifactId>flightdata-core</artifactId>
-            <version>0.1</version>
+            <groupId>it.ozimov</groupId>
+            <artifactId>embedded-redis</artifactId>
+            <version>0.7.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>2.27.2</version>
+            <scope>test</scope>
         </dependency>
         <!-- micronaut -->
         <dependency>

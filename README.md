@@ -11,7 +11,7 @@ Required environment variables:
 | -------- | ----------- | ------------- |
 | REDIS_HOST | Address of the redis host | localhost |
 | REDIS_PORT | Port of the redis host | 6379 |
-| STORAGE_REDIS_EXPIRE_AFTER_SECONDS | Expiry date for flight data stored in redis | 300 |
+| OPENSKY_API_URL | OpenSky API url | https://opensky-network.org/api/states/all |
 | OPENSKY_API_USER | OpenSky API user | user |
 | OPENSKY_API_PASSWORD | OpenSky API password | password |
 | GOOGLE_CONFIG_PATH | Path to Firebase config file | "/home/myplanes/.myplanes/myplanes-aef4f-firebase-adminsdk-z1qhu-80e7a918bb.json" |

@@ -26,6 +26,7 @@ redis:
   port: ${REDIS_PORT}
 
 openskyapi:
+  url: ${OPENSKY_API_URL}
   user: ${OPENSKY_API_USER}
   password: ${OPENSKY_API_PASSWORD}
 
@@ -33,12 +34,6 @@ google:
   config:
     path: ${GOOGLE_CONFIG_PATH}
     databaseUrl: ${GOOGLE_CONFIG_DATABASE_URL}
-
-storage.redis:
-  expireAfterSeconds: ${STORAGE_REDIS_EXPIRE_AFTER_SECONDS}
-
-job-config-file:
-  path: ${JOB_CONFIG_FILE_PATH}
 
 aircraft-data-file:
   path: ${AIRCRAFT_DATA_FILE}

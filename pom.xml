@@ -8,8 +8,7 @@
   <version>0.1</version>
 
   <modules>
-    <module>base</module>
-    <module>flightdata-core</module>
+    <module>base-pom</module>
     <module>app</module>
   </modules>
 
