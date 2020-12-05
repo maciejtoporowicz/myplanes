@@ -7,8 +7,8 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
-      sha1:
-        description: sha1
+      version:
+        description: app version
         required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -28,5 +28,5 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            ln -fs "app-${{ github.event.inputs.sha1 }}.jar" myplanes.jar
+            ln -fs "/home/myplanes/app_versions/app-${{ github.event.inputs.version }}.jar" myplanes.jar
             sudo systemctl restart myplanes
