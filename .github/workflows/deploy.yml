@@ -25,12 +25,9 @@ jobs:
         with:
           java-version: 11
       - name: Set version = build number
-        run: mvn versions:set -DnewVersion=$GITHUB_RUN_NUMBER -DprocessAllModules=true
+        run: mvn versions:set -DnewVersion=${{ github.run_number }} -DprocessAllModules=true
       - name: Build with Maven
         run: mvn clean package
-      - name: Set commit id variable
-        id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
       - name: create 'app_versions' directory if it does not exist
         uses: appleboy/ssh-action@master
         with:
@@ -49,5 +46,5 @@ jobs:
           key: ${{ secrets.DO_MYPLANES_KEY }}
           port: 22
           strip_components: 2
-          source: "app/target/app-$GITHUB_RUN_NUMBER.jar"
+          source: "app/target/app-${{ github.run_number }}.jar"
           target: "/home/myplanes/app_versions"
