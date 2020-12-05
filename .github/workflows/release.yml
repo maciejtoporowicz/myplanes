@@ -28,5 +28,5 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            ln -fs "/home/myplanes/app_versions/app-${{ github.event.inputs.version }}.jar" myplanes.jar
+            ln -sfn app_versions/app-${{ github.event.inputs.version }}.jar myplanes.jar
             sudo systemctl restart myplanes
