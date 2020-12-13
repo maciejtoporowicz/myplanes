@@ -7,7 +7,7 @@ micronaut:
       configurations:
         web:
           allowedOrigins:
-            - ${FRONTEND_URL}
+            - ${FRONTEND_URL:http://localhost:8080}
           allowedMethods:
             - GET
             - PATCH
@@ -15,18 +15,18 @@ micronaut:
             - POST
             - PUT
   ssl:
-    enabled: ${SSL_ENABLED:true}
+    enabled: ${SSL_ENABLED:false}
     keyStore:
       path: "file:${SSL_CERT_PATH}"
       password: "${SSL_CERT_PASSWORD}"
       type: "${KEYSTORE_TYPE}"
 
 redis:
-  host: ${REDIS_HOST}
-  port: ${REDIS_PORT}
+  host: ${REDIS_HOST:localhost}
+  port: ${REDIS_PORT:6379}
 
 openskyapi:
-  url: ${OPENSKY_API_URL}
+  url: "https://opensky-network.org"
   user: ${OPENSKY_API_USER}
   password: ${OPENSKY_API_PASSWORD}
 
