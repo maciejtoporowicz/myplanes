@@ -160,28 +160,28 @@ class FlightDataStep : En {
                         rowMap["owner"]
                 )
             }
-            val expectedData = LastKnownFlightsData(
+            val expectedData = LastKnownFlightData(
                     jobId, Instant.ofEpochSecond(time.toLong()),
                     expectedFlightData
             )
 
-            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
+            val actualData = module.queries().getLastKnownFlightDataFor(jobId)
 
             assertThat(actualData).isEqualTo(expectedData)
         }
 
         Then("querying data for job with id={string} provides no results") { jobId: String ->
 
-            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
+            val actualData = module.queries().getLastKnownFlightDataFor(jobId)
 
             assertThat(actualData).isNull()
         }
 
         Then("querying data for job with id={string} provides empty results at time {int}") { jobId: String, time: Int ->
 
-            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
+            val actualData = module.queries().getLastKnownFlightDataFor(jobId)
 
-            assertThat(actualData).isEqualTo(LastKnownFlightsData(jobId, Instant.ofEpochSecond(time.toLong()), emptyList()))
+            assertThat(actualData).isEqualTo(LastKnownFlightData(jobId, Instant.ofEpochSecond(time.toLong()), emptyList()))
         }
     }
 

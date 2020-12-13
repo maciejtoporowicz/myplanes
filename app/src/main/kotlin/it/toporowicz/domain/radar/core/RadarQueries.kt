@@ -2,11 +2,11 @@ package it.toporowicz.domain.radar.core
 
 import it.toporowicz.domain.radar.ports.aircraft.AircraftDataRepo
 import it.toporowicz.domain.radar.api.FlightData
-import it.toporowicz.domain.radar.api.LastKnownFlightsData
+import it.toporowicz.domain.radar.api.LastKnownFlightData
 import it.toporowicz.domain.radar.ports.cache.FlightDataCache
 
 class RadarQueries(private val flightDataCache: FlightDataCache, private val aircraftDataRepo: AircraftDataRepo) {
-    fun getLastKnownRadarDataFor(jobId: String): LastKnownFlightsData? {
+    fun getLastKnownFlightDataFor(jobId: String): LastKnownFlightData? {
         val lastKnownRadarData = flightDataCache.get(jobId) ?: return null
 
         val icao24s = lastKnownRadarData.radarData.map { it.icao24 }.toSet()
@@ -28,7 +28,7 @@ class RadarQueries(private val flightDataCache: FlightDataCache, private val air
             )
         }
 
-        return LastKnownFlightsData(
+        return LastKnownFlightData(
                 lastKnownRadarData.jobId,
                 lastKnownRadarData.updatedAt,
                 radarData.sortedBy { it.icao24 }

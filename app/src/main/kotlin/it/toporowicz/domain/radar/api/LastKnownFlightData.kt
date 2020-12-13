@@ -14,7 +14,7 @@ data class FlightData (
         val owner: String?
 )
 
-data class LastKnownFlightsData(
+data class LastKnownFlightData(
         val jobId: String,
         val updatedAt: Instant,
         val data: List<FlightData>
