@@ -1,14 +1,14 @@
 package it.toporowicz.cron.flightbroadcast.config
 
-import it.toporowicz.domain.flightdata.api.FlightScannerConfig
+import it.toporowicz.domain.radar.api.RadarConfig
 import it.toporowicz.domain.jobs.api.Job
 import org.quartz.JobDataMap
 import javax.inject.Singleton
 
 @Singleton
 class FlightBroadcastJobConfigService(private val coordinatesReader: CoordinatesReader, private val distanceReader: DistanceReader) {
-    fun readFrom(jobDataMap: JobDataMap): FlightScannerConfig {
-        return FlightScannerConfig(
+    fun readFrom(jobDataMap: JobDataMap): RadarConfig {
+        return RadarConfig(
                 jobId = jobDataMap.getString("jobId"),
                 coordinates = coordinatesReader.from(jobDataMap.getString("coordinates")),
                 boundaryOffsetNorth = distanceReader.from(jobDataMap.getString("boundaryOffsetNorth")),

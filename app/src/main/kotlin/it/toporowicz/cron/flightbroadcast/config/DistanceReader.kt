@@ -1,6 +1,6 @@
 package it.toporowicz.cron.flightbroadcast.config
 
-import it.toporowicz.domain.flightdata.api.Distance
+import it.toporowicz.domain.radar.api.Distance
 import java.math.BigDecimal
 import javax.inject.Singleton
 

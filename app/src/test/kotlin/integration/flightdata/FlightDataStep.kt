@@ -1,16 +1,17 @@
 package integration.flightdata
 
-import integration.flightdata.fakes.FakePushMessagingService
+import integration.flightdata.fakes.FakeApplicationEventPublisher
 import integration.flightdata.mocks.OpenSkyApiMock
 import io.cucumber.datatable.DataTable
 import io.cucumber.java8.En
-import it.toporowicz.domain.flightdata.FlightDataModuleFactory
-import it.toporowicz.domain.flightdata.OpenSkyApiConfig
-import it.toporowicz.domain.flightdata.api.*
-import it.toporowicz.domain.flightdata.core.FlightDataModule
-import it.toporowicz.domain.flightdata.ports.radarData.RadarData
+import it.toporowicz.domain.radar.api.AircraftData
+import it.toporowicz.domain.radar.RadarModuleFactory
+import it.toporowicz.domain.radar.OpenSkyApiConfig
+import it.toporowicz.domain.radar.api.*
+import it.toporowicz.domain.radar.core.RadarModule
+import it.toporowicz.domain.radar.ports.broadcast.notifications.NewFlightsEvent
+import it.toporowicz.domain.radar.ports.radarData.RadarData
 import it.toporowicz.infrastructure.mapper.ObjectMapperFactory
-import it.toporowicz.infrastructure.pushmessaging.Message
 import org.assertj.core.api.Assertions.assertThat
 import org.mockito.BDDMockito.given
 import org.mockito.Mockito
@@ -32,9 +33,9 @@ class FlightDataStep : En {
     private val jedisPool: JedisPool
     private val openSkyApiMock = OpenSkyApiMock(OPEN_SKY_API_USER, OPEN_SKY_API_PASS)
 
-    private val pushNotificationService = FakePushMessagingService()
+    private val fakeApplicationEventPublisher = FakeApplicationEventPublisher()
 
-    private val module: FlightDataModule
+    private val module: RadarModule
 
     init {
         redis.start()
@@ -50,12 +51,12 @@ class FlightDataStep : En {
                 get() = OPEN_SKY_API_PASS
         }
 
-        this.module = FlightDataModuleFactory().create(
+        this.module = RadarModuleFactory().create(
                 clock,
-                pushNotificationService,
                 jedisPool,
                 ObjectMapperFactory().create(),
-                openSkyApiConfig
+                openSkyApiConfig,
+                fakeApplicationEventPublisher
         )
 
         configureSteps()
@@ -77,7 +78,7 @@ class FlightDataStep : En {
                         rowMap["owner"],
                 )
             }.forEach {
-                this.module.putAircraftData(it)
+                this.module.addAircraftData(it)
             }
         }
 
@@ -93,7 +94,7 @@ class FlightDataStep : En {
         { jobConfigTable: DataTable ->
             val row = jobConfigTable.asMaps()[0]
 
-            val flightScannerConfig = FlightScannerConfig(
+            val flightScannerConfig = RadarConfig(
                     requireNotNull(row["jobId"]),
                     Coordinates(
                             DecimalDegrees(BigDecimal(requireNotNull(row["lat"]))),
@@ -106,7 +107,7 @@ class FlightDataStep : En {
                     Distance(BigDecimal(requireNotNull(row["altitudeThreshold"])))
             )
 
-            this.module.broadcastDataAccordingTo(flightScannerConfig)
+            this.module.cacheRadarDataAccordingTo(flightScannerConfig)
         }
 
         Given("radar provides no flights for latMax={string}, lonMax={string}, latMin={string}, lonMin={string}")
@@ -121,26 +122,28 @@ class FlightDataStep : En {
                         requireNotNull(rowMap["icao24"]),
                         rowMap["callSign"],
                         rowMap["barometricAltitude"]?.let { Distance(BigDecimal(it)) },
-                        rowMap["onGround"]?.let { it.toBoolean() }
+                        rowMap["onGround"]?.let { it.toBoolean() },
+                        rowMap["longitude"]?.let { DecimalDegrees(BigDecimal(it)) },
+                        rowMap["latitude"]?.let { DecimalDegrees(BigDecimal(it)) }
                 )
             }.toSet()
 
             this.openSkyApiMock.givenRadarData(radarData, latMin, latMax, lonMin, lonMax)
         }
 
-        Then("the following notification should be sent") { notificationsTable: DataTable ->
+        Then("the following 'New flights event' should be sent") { notificationsTable: DataTable ->
             val notification = notificationsTable.asMaps()[0].let { rowMap ->
-                aNotificationMessage(
+                aNewFlightsEvent(
                         requireNotNull(rowMap["jobId"]),
                         Integer.parseInt(requireNotNull(rowMap["newFlightsCount"]))
                 )
             }
 
-            assertThat(pushNotificationService.getLastSentNotification()).isEqualTo(notification.data["jobId"] to notification)
+            assertThat(fakeApplicationEventPublisher.getLastSentEvent()).isEqualTo(notification)
         }
 
         Then("no notifications should be sent") {
-            assertThat(pushNotificationService.getLastSentNotification()).isNull()
+            assertThat(fakeApplicationEventPublisher.getLastSentEvent()).isNull()
         }
 
         Then("querying data for job with id={string} provides the following results updated at {int}") { jobId: String, time: Int, expectedFlightDataTable: DataTable ->
@@ -150,6 +153,8 @@ class FlightDataStep : En {
                         rowMap["callSign"],
                         rowMap["barometricAltitude"]?.let { Distance.meters(BigDecimal(it)) },
                         rowMap["onGround"]?.let { it.toBoolean() },
+                        rowMap["longitude"]?.let { DecimalDegrees(BigDecimal(it)) },
+                        rowMap["latitude"]?.let { DecimalDegrees(BigDecimal(it)) },
                         rowMap["make"],
                         rowMap["model"],
                         rowMap["owner"]
@@ -160,21 +165,21 @@ class FlightDataStep : En {
                     expectedFlightData
             )
 
-            val actualData = module.getLastKnownFlightDataFor(jobId)
+            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
 
             assertThat(actualData).isEqualTo(expectedData)
         }
 
         Then("querying data for job with id={string} provides no results") { jobId: String ->
 
-            val actualData = module.getLastKnownFlightDataFor(jobId)
+            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
 
             assertThat(actualData).isNull()
         }
 
         Then("querying data for job with id={string} provides empty results at time {int}") { jobId: String, time: Int ->
 
-            val actualData = module.getLastKnownFlightDataFor(jobId)
+            val actualData = module.queries().getLastKnownRadarDataFor(jobId)
 
             assertThat(actualData).isEqualTo(LastKnownFlightsData(jobId, Instant.ofEpochSecond(time.toLong()), emptyList()))
         }
@@ -185,12 +190,7 @@ class FlightDataStep : En {
         given(clock.instant()).willReturn(Instant.ofEpochSecond(time.toLong()))
     }
 
-    private fun aNotificationMessage(jobId: String, newFlightsCount: Int): Message {
-        return Message(
-                mapOf(
-                        "jobId" to jobId,
-                        "newFlightsCount" to newFlightsCount.toString()
-                )
-        )
+    private fun aNewFlightsEvent(jobId: String, newFlightsCount: Int): NewFlightsEvent {
+        return NewFlightsEvent(jobId, newFlightsCount)
     }
 }

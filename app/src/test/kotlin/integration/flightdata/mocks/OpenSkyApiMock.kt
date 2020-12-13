@@ -3,7 +3,7 @@ package integration.flightdata.mocks
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import it.toporowicz.domain.flightdata.ports.radarData.RadarData
+import it.toporowicz.domain.radar.ports.radarData.RadarData
 import java.net.HttpURLConnection
 
 class OpenSkyApiMock(private val username: String, private val password: String) {
@@ -57,8 +57,8 @@ class OpenSkyApiMock(private val username: String, private val password: String)
                 "United States",
                 1600721299,
                 1600721299,
-                -96.0514,
-                36.2229,
+                ${radarData.longitude?.value?.toString() ?: "null"},
+                ${radarData.latitude?.value?.toString() ?: "null"},
                 ${radarData.barometricAltitude?.meters?.toString() ?: "null"},
                 ${radarData.onGround?.toString() ?: "null"},
                 87.55,

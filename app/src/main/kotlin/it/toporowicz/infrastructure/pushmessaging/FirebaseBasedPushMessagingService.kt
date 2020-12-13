@@ -4,10 +4,15 @@ import com.google.cloud.firestore.DocumentReference
 import com.google.cloud.firestore.DocumentSnapshot
 import com.google.cloud.firestore.Firestore
 import com.google.firebase.messaging.FirebaseMessaging
+import org.slf4j.LoggerFactory
 import javax.inject.Singleton
 
 @Singleton
 class FirebaseBasedPushMessagingService(private val firestore: Firestore, private val firebaseMessaging: FirebaseMessaging): PushMessagingService {
+    companion object {
+        val log = LoggerFactory.getLogger(FirebaseBasedPushMessagingService::class.java)
+    }
+
     override fun upsertTokenFor(clientId: String, newToken: String) {
         val clientRef = firestore
                 .collection("clients")
@@ -43,6 +48,8 @@ class FirebaseBasedPushMessagingService(private val firestore: Firestore, privat
     }
 
     override fun sendMessageToTopic(topic: String, message: Message) {
+        log.info("Sending message: $message to topic $topic")
+
         firebaseMessaging.send(
                 com.google.firebase.messaging.Message.builder()
                         .setTopic(topic)

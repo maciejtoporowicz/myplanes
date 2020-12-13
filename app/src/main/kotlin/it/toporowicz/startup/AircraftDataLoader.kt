@@ -2,8 +2,8 @@ package it.toporowicz.startup
 
 import io.micronaut.context.annotation.ConfigurationProperties
 import io.micronaut.context.annotation.Context
-import it.toporowicz.domain.flightdata.core.FlightDataModule
-import it.toporowicz.domain.flightdata.api.AircraftData
+import it.toporowicz.domain.radar.core.RadarModule
+import it.toporowicz.domain.radar.api.AircraftData
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -12,11 +12,11 @@ import kotlin.concurrent.thread
 
 @ConfigurationProperties("aircraft-data-file")
 interface AircraftDataFileConfig {
-    val path: String
+    val path: String?
 }
 
 @Context
-class AircraftDataLoader(private val flightDataModule: FlightDataModule,
+class AircraftDataLoader(private val radarModule: RadarModule,
                          private val aircraftDataFileConfig: AircraftDataFileConfig) {
     companion object {
         val log: Logger = LoggerFactory.getLogger(AircraftDataLoader::class.java)
@@ -25,8 +25,23 @@ class AircraftDataLoader(private val flightDataModule: FlightDataModule,
     @PostConstruct
     fun init() {
         thread(start = true) {
+            val aircraftDataFileConfigPath = aircraftDataFileConfig.path
+
+            if(aircraftDataFileConfigPath == null) {
+                log.warn("Path to aircraft data file not provided.")
+                return@thread
+            }
+
+            val file = File(aircraftDataFileConfigPath)
+
+            if(!file.exists()) {
+                log.warn("Aircraft data file does not exist.")
+                return@thread
+            }
+
             log.info("Loading aircraft data...")
-            File(aircraftDataFileConfig.path).forEachLine {
+
+            file.forEachLine {
                 val values = it.split(",")
 
                 if (values.size != 4) {
@@ -43,8 +58,9 @@ class AircraftDataLoader(private val flightDataModule: FlightDataModule,
                 val model = values[2]
                 val owner = values[3]
 
-                flightDataModule.putAircraftData(AircraftData(icao24, make, model, owner))
+                radarModule.addAircraftData(AircraftData(icao24, make, model, owner))
             }
+
             log.info("Finished loading aircraft data...")
         }
     }

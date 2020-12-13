@@ -13,7 +13,7 @@ Feature: broadcasting
     When scanner is run with the following configuration
       | jobId     | lat | lon | boundaryN | boundaryE | boundaryS | boundaryW | altitudeThreshold |
       | my-job-id | 50  | 50  | 300       | 300       | 300       | 300       | 5000              |
-    Then the following notification should be sent
+    Then the following 'New flights event' should be sent
       | jobId     | newFlightsCount |
       | my-job-id | 3               |
 
@@ -31,7 +31,7 @@ Feature: broadcasting
     When scanner is run with the following configuration
       | jobId     | lat | lon | boundaryN | boundaryE | boundaryS | boundaryW | altitudeThreshold |
       | my-job-id | 50  | 50  | 300       | 300       | 300       | 300       | 5000              |
-    Then the following notification should be sent
+    Then the following 'New flights event' should be sent
       | jobId     | newFlightsCount |
       | my-job-id | 1               |
     Given radar provides the following flights for latMax="50.002698", lonMax="50.004198", latMin="49.997300", lonMin="49.995801"
@@ -42,7 +42,7 @@ Feature: broadcasting
     When scanner is run with the following configuration
       | jobId     | lat | lon | boundaryN | boundaryE | boundaryS | boundaryW | altitudeThreshold |
       | my-job-id | 50  | 50  | 300       | 300       | 300       | 300       | 5000              |
-    Then the following notification should be sent
+    Then the following 'New flights event' should be sent
       | jobId     | newFlightsCount |
       | my-job-id | 2               |
 
@@ -53,7 +53,7 @@ Feature: broadcasting
     When scanner is run with the following configuration
       | jobId     | lat | lon | boundaryN | boundaryE | boundaryS | boundaryW | altitudeThreshold |
       | my-job-id | 50  | 50  | 300       | 300       | 300       | 300       | 5000              |
-    Then the following notification should be sent
+    Then the following 'New flights event' should be sent
       | jobId     | newFlightsCount |
       | my-job-id | 1               |
     Given radar provides the following flights for latMax="50.002698", lonMax="50.004198", latMin="49.997300", lonMin="49.995801"
@@ -64,6 +64,6 @@ Feature: broadcasting
     When scanner is run with the following configuration
       | jobId     | lat | lon | boundaryN | boundaryE | boundaryS | boundaryW | altitudeThreshold |
       | my-job-id | 50  | 50  | 300       | 300       | 300       | 300       | 5000              |
-    Then the following notification should be sent
+    Then the following 'New flights event' should be sent
       | jobId     | newFlightsCount |
       | my-job-id | 3               |

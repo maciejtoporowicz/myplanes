@@ -1,7 +1,7 @@
 package it.toporowicz.cron.flightbroadcast.config
 
-import it.toporowicz.domain.flightdata.api.Coordinates
-import it.toporowicz.domain.flightdata.api.DecimalDegrees
+import it.toporowicz.domain.radar.api.Coordinates
+import it.toporowicz.domain.radar.api.DecimalDegrees
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
