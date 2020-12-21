@@ -9,6 +9,7 @@ data class FlightData (
         val onGround: Boolean?,
         val longitude: DecimalDegrees?,
         val latitude: DecimalDegrees?,
+        val track: Track?,
         val aircraftMake: String?,
         val aircraftModel: String?,
         val owner: String?

@@ -22,6 +22,7 @@ class RadarQueries(private val flightDataCache: FlightDataCache, private val air
                     it.onGround,
                     it.longitude,
                     it.latitude,
+                    it.track,
                     matchingAircraftData?.make,
                     matchingAircraftData?.model,
                     matchingAircraftData?.owner

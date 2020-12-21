@@ -156,6 +156,7 @@ class FlightDataStep : En {
                         rowMap["onGround"]?.let { it.toBoolean() },
                         rowMap["longitude"]?.let { DecimalDegrees(BigDecimal(it)) },
                         rowMap["latitude"]?.let { DecimalDegrees(BigDecimal(it)) },
+                        rowMap["track"]?.let { Track(BigDecimal(it)) },
                         rowMap["make"],
                         rowMap["model"],
                         rowMap["owner"]
