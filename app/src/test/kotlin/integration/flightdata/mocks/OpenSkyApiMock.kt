@@ -62,7 +62,7 @@ class OpenSkyApiMock(private val username: String, private val password: String)
                 ${radarData.barometricAltitude?.meters?.toString() ?: "null"},
                 ${radarData.onGround?.toString() ?: "null"},
                 87.55,
-                276.75,
+                ${radarData.track?.value?.toString() ?: "null"},
                 1.95,
                 null,
                 739.14,

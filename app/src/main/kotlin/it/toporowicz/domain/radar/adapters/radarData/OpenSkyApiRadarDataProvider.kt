@@ -3,6 +3,7 @@ package it.toporowicz.domain.radar.adapters.radarData
 import it.toporowicz.domain.radar.api.DecimalDegrees
 import it.toporowicz.domain.radar.core.coordinates.CoordinatesBoundary
 import it.toporowicz.domain.radar.api.Distance
+import it.toporowicz.domain.radar.api.Track
 import it.toporowicz.domain.radar.ports.radarData.RadarData
 import it.toporowicz.domain.radar.ports.radarData.RadarDataProvider
 import it.toporowicz.infrastructure.mapper.ObjectMapper
@@ -67,6 +68,7 @@ class OpenSkyApiRadarDataProvider(
                             onGround = nullStringToNullValue(state[8])?.toBoolean(),
                             longitude = nullStringToNullValue(state[5])?.let { DecimalDegrees(BigDecimal(it)) },
                             latitude = nullStringToNullValue(state[6])?.let { DecimalDegrees(BigDecimal(it)) },
+                            track = nullStringToNullValue(state[10])?.let { Track(BigDecimal(it)) }
                     )
                 }
                 .filter(altitudeUnknownOrLessThan(maxAltitude))

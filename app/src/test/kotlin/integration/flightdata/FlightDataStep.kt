@@ -124,7 +124,8 @@ class FlightDataStep : En {
                         rowMap["barometricAltitude"]?.let { Distance(BigDecimal(it)) },
                         rowMap["onGround"]?.let { it.toBoolean() },
                         rowMap["longitude"]?.let { DecimalDegrees(BigDecimal(it)) },
-                        rowMap["latitude"]?.let { DecimalDegrees(BigDecimal(it)) }
+                        rowMap["latitude"]?.let { DecimalDegrees(BigDecimal(it)) },
+                        rowMap["track"]?.let { Track(BigDecimal(it)) }
                 )
             }.toSet()
 
